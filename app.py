@@ -4,6 +4,7 @@ from my_fake_useragent import UserAgent
 import json
 import random
 from lxml import html
+from concurrent.futures import ThreadPoolExecutor
 
 
 #get Random USER AGENT
@@ -21,13 +22,16 @@ def parseJt():
     parsedList = [token, jt_req.cookies]
     return parsedList
 
+def urls(arg:tuple):
+    return arg
+
 app = Flask(__name__)
-@app.route('/') 
+@app.route('/shippingrate') 
 def multi_shipping_rates():
     parsedList = parseJt()
     headers = { 'accept': 'application/json, text/javascript, */*; q=0.01',
                 'User-Agent': getRandomUA()}
-    payload = {'origin_country': 'MY',
+    ctl_payload = {'origin_country': 'MY',
                 'origin_state': 'Selangor',#Invalid but required
                 'origin_postcode': 46000,
                 'destination_country': 'MY',
@@ -40,17 +44,6 @@ def multi_shipping_rates():
                 'parcel_weight': 44,
                 'document_weight': ''
                 }
-    #Session object to increase performance          
-    session = requests.Session()
-    # citylink_req = session.post('https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate',headers=headers, params=payload)
-    # dataList = []
-    # result = json.loads(citylink_req.text)
-    # for key in result:
-    #     value = result[key]['data']['rate']
-    #     dataList.append({'courier': 'citylink', 'rate':float(value)})
-    # return jsonify({'data':dataList})
-
-
     jt_payload = { '_token': str(parsedList[0]),
                 'shipping_rates_type': 'domestic',
                 'sender_postcode': 63000,
@@ -62,13 +55,32 @@ def multi_shipping_rates():
                 'width': 23,
                 'height': 7,
                 'item_value': ''
-                }
+                }            
+    #Session object to increase performance          
+    session = requests.Session()
 
-    jt_req = session.post('https://www.jtexpress.my/shipping-rates',headers=headers, params=jt_payload, cookies=parsedList[1], verify = False)
+    list_of_urls = [
+       session.post(url="https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate",  params=ctl_payload, headers= headers, verify=False),
+       session.post(url="https://www.jtexpress.my/shipping-rates", params=jt_payload, verify=False, headers= headers,cookies=parsedList[1])
+        ] 
 
-    tree = html.fromstring(jt_req.content)
-    table = tree.xpath("//table[@class='table table-bordered mb-0']//td[@class='col-4']/text()")[6].strip()
-    return jsonify({"courier": "jt", "data":float(table)})
-
+    with ThreadPoolExecutor(max_workers=3) as pool:
+        response_list =  list(pool.map(urls,list_of_urls))
+    dataList = []    
+    i = 0
+    while i < len(response_list):
+        if(i==0): #cityLink
+            result = json.loads(response_list[i].text)
+            for key in result:
+                value = result[key]["data"]["rate"]
+                dataList.append({"courier": "citylink", "rate":float(value)})
+        elif(i==1): #jtexpress
+            tree = html.fromstring(response_list[i].content)
+            table = tree.xpath("//table[@class='table table-bordered mb-0']//td[@class='col-4']/text()")[6].strip()
+            dataList.append({"courier": "jtexpress", "rate":float(table)})
+        i += 1
+    return jsonify({"data":dataList})
+    
+ 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000, debug=True)
