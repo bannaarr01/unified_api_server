@@ -27,12 +27,18 @@ def multi_shipping_rates():
                 'width': 3,
                 'height': 6,
                 'selected_type': 1,
-                'parcel_weight': 12,
+                'parcel_weight': 44,
                 'document_weight': ''
                 }
-    r = requests.post('https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate',headers=headers, params=payload)
-    data = r.text
-    return data
+    #Session object to increase performance          
+    session = requests.Session()
+    citylink_req = session.post('https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate',headers=headers, params=payload)
+    dataList = []
+    result = json.loads(citylink_req.text)
+    for key in result:
+        value = result[key]['data']['rate']
+        dataList.append({'courier': 'citylink', 'rate':float(value)})
+    return jsonify({'data':dataList})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000, debug=True)
