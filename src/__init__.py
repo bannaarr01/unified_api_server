@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 import os
 from src.shippingrate import shippingrate
 from src.auth import auth
@@ -22,8 +22,17 @@ def create_app(test_config=None):
     db.init_app(app)
     JWTManager(app)
     db.create_all()
-    
+
     app.register_blueprint(auth)
     app.register_blueprint(shippingrate)   
+
+    #error handling
+    @app.errorhandler(404)
+    def handle_error_404(ex):
+         return jsonify({'error':'Not found'}), 404
+
+    @app.errorhandler(500) #Internal Server Error
+    def handle_error_500(ex):
+         return jsonify({'error':'Something went wrong, we are working on it'}), 500
 
     return app    

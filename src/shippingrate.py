@@ -32,8 +32,6 @@ def urls(arg:tuple):
 @shippingrate.post('/')
 @jwt_required()
 def multi_shipping_rates():
-        # origin_postcode = request.json['origin_postcode']
-        # destination_postcode = request.json['destination_postcode']
         origin_postcode = request.get_json().get('origin_postcode', '')
         destination_postcode = request.get_json().get('destination_postcode', '')
         width = request.get_json().get('width', '')
@@ -61,7 +59,7 @@ def multi_shipping_rates():
             return jsonify({'error': 'Enter valid weight (kg)'})   
 
         parsedList = parseJt()
-        
+
         headers = { 'accept': 'application/json, text/javascript, */*; q=0.01',
                     'User-Agent': getRandomUA()}
 
@@ -123,4 +121,4 @@ def multi_shipping_rates():
                 data = response_list[i].json()
                 dataList.append({"courier": "lineclearexpress", "rate":float(data["price"])})     
             i += 1
-        return jsonify({"data":dataList})
+        return jsonify({"data":dataList}), 200
