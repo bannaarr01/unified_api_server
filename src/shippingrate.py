@@ -7,6 +7,7 @@ from lxml import html
 from concurrent.futures import ThreadPoolExecutor
 from flask_jwt_extended import jwt_required
 import validators
+from flasgger import swag_from
 
 shippingrate = Blueprint('shippingrate', __name__, url_prefix='/api/v1/shippingrate')
 
@@ -31,6 +32,7 @@ def urls(arg:tuple):
 
 @shippingrate.post('/')
 @jwt_required()
+@swag_from('./docs/shippingrate/shippingrate.yaml')
 def multi_shipping_rates():
         origin_postcode = request.get_json().get('origin_postcode', '')
         destination_postcode = request.get_json().get('destination_postcode', '')
@@ -41,22 +43,22 @@ def multi_shipping_rates():
 
 
         if not validators.length(origin_postcode, min=5, max=5):
-            return jsonify({'error': 'Enter valid origin post code'})
+            return jsonify({'error': 'Enter valid origin post code'}), 422
 
         if not validators.length(destination_postcode, min=5, max=5):
-            return jsonify({'error': 'Enter valid destination post code'})
+            return jsonify({'error': 'Enter valid destination post code'}), 422
 
         if not validators.between(int(width), min=1, max=999):
-            return jsonify({'error': 'Enter valid width'}) 
+            return jsonify({'error': 'Enter valid width'}), 422 
 
         if not validators.between(int(length), min=1, max=999):
-            return jsonify({'error': 'Enter valid length'})
+            return jsonify({'error': 'Enter valid length'}), 422
 
         if not validators.between(int(height), min=1, max=999):
-            return jsonify({'error': 'Enter valid height'})
+            return jsonify({'error': 'Enter valid height'}), 422
 
         if not validators.between(int(weight), min=1, max=999):
-            return jsonify({'error': 'Enter valid weight (kg)'})   
+            return jsonify({'error': 'Enter valid weight (kg)'}), 422   
 
         parsedList = parseJt()
 

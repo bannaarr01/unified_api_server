@@ -1,0 +1,17 @@
+Get user refresh token
+---
+tags:
+  - Authorization
+parameters:
+  - name: Authorization
+    description: The header should contain the authenticated user refresh token after a successful login example value | Bearer then_the_refresh_token
+    in: header
+    required: true
+ 
+
+responses:
+  201:
+    description: When a new access token was successfully generated
+
+  400:
+    description: Fails to get refresh token due to authentication error

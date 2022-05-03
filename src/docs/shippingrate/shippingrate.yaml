@@ -1,0 +1,38 @@
+Get shipping rate
+---
+tags:
+  - Shipping Rates
+parameters:
+  - name: body
+    description: The body should contain the below credentials
+    in: body
+    required: true
+    properties:
+      origin_postcode:
+        type: "string"
+        example: "71800"
+      destination_postcode:
+        type: "string"
+        example: "6300"
+      width:
+        type: "string"
+        example: "7"
+      length:
+        type: "string"
+        example: "9"
+      height:
+        type: "string"
+        example: "5"
+      weight:
+        type: "string"
+        example: "15"
+   
+responses:
+  200:
+    description: When it returns shipping rates from various courier services
+
+  401:
+    description: Fails to get shipping rate due to authentication error
+
+  422:
+    description: Fails due to bad data supplied
