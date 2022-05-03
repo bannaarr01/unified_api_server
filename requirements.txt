@@ -1,3 +1,4 @@
 flask==2.1.2
 my-fake-useragent==0.2.0
 requests
+lxml
