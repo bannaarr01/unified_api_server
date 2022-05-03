@@ -1,0 +1,11 @@
+*.pyc
+/__pycache__
+__pycache__
+venv/
+.vscode
+.env
+.env.backup
+/.vscode
+.DS_Store
+/.DS_Store
+
