@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 import validators
 from src.database import User, db
+from flask_jwt_extended import create_access_token, create_refresh_token
+
+
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
@@ -27,4 +30,29 @@ def register():
 
     return jsonify({'message': 'User created', 
     'user':{'email': email}}), 201
-  
+
+
+@auth.post('/login')
+def auth_user():
+    # db.create_all()
+    email=request.json.get('email', '') #default ''
+    password=request.json.get('password', '')#cos pas is key
+
+    user=User.query.filter_by(email=email).first()
+
+    if user:
+        is_pass_authorized = check_password_hash(user.password, password)
+
+        if is_pass_authorized:
+            refresh=create_refresh_token(identity=user.id)
+            access=create_access_token(identity=user.id)
+
+            return jsonify({
+                'user':{
+                    'refresh':refresh,
+                    'access':access,
+                    'email':email
+                }
+                }), 200
+
+    return jsonify({'error': 'Invalid credentials'}), 401

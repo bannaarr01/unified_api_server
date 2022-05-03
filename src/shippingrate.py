@@ -5,6 +5,7 @@ import json
 import random
 from lxml import html
 from concurrent.futures import ThreadPoolExecutor
+from flask_jwt_extended import jwt_required
 
 shippingrate = Blueprint('shippingrate', __name__, url_prefix='/api/v1/shippingrate')
 
@@ -28,6 +29,7 @@ def urls(arg:tuple):
 
 
 @shippingrate.get('/')
+@jwt_required()
 def multi_shipping_rates():
         parsedList = parseJt()
         headers = { 'accept': 'application/json, text/javascript, */*; q=0.01',

@@ -3,6 +3,8 @@ import os
 from src.shippingrate import shippingrate
 from src.auth import auth
 from src.database import db
+from flask_jwt_extended import JWTManager
+
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -17,7 +19,10 @@ def create_app(test_config=None):
          app.config.from_mapping(test_config)
 
     db.app = app
-    db.init_app(app) 
+    db.init_app(app)
+    JWTManager(app)
+    db.create_all()
+    
     app.register_blueprint(auth)
     app.register_blueprint(shippingrate)   
 
