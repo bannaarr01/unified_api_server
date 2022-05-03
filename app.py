@@ -55,13 +55,20 @@ def multi_shipping_rates():
                 'width': 23,
                 'height': 7,
                 'item_value': ''
-                }            
+                } 
+    lc_payload = { 
+                'zipfrom': '63000',
+                'zipto':'71800',
+                'weight': 23,
+                'parceltype':'P'
+                }          
     #Session object to increase performance          
     session = requests.Session()
 
     list_of_urls = [
-       session.post(url="https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate",  params=ctl_payload, headers= headers, verify=False),
-       session.post(url="https://www.jtexpress.my/shipping-rates", params=jt_payload, verify=False, headers= headers,cookies=parsedList[1])
+       session.post(url="https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate",  params=ctl_payload, headers=headers, verify=False),
+       session.post(url="https://www.jtexpress.my/shipping-rates", params=jt_payload, verify=False, headers=headers,cookies=parsedList[1]),
+       session.get('https://lineclearexpress.com/my/quote/quote.php', params=lc_payload, headers=headers, verify = False)
         ] 
 
     with ThreadPoolExecutor(max_workers=3) as pool:
@@ -78,9 +85,12 @@ def multi_shipping_rates():
             tree = html.fromstring(response_list[i].content)
             table = tree.xpath("//table[@class='table table-bordered mb-0']//td[@class='col-4']/text()")[6].strip()
             dataList.append({"courier": "jtexpress", "rate":float(table)})
+        elif(i==2): #clearlineexpress    
+            data = response_list[i].json()
+            dataList.append({"courier": "lineclearexpress", "rate":float(data["price"])})     
         i += 1
     return jsonify({"data":dataList})
-    
+
  
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=3000, debug=True)
