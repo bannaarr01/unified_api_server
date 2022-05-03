@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 import validators
 from src.database import User, db
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token,jwt_required, get_jwt_identity
 
 
 
@@ -56,3 +56,12 @@ def auth_user():
                 }), 200
 
     return jsonify({'error': 'Invalid credentials'}), 401
+
+
+@auth.get('/token/refresh')
+@jwt_required(refresh=True)
+def refresh_auth_user_token():
+    identity = get_jwt_identity()
+    access = create_access_token(identity=identity)
+
+    return jsonify({'access':access}), 200
