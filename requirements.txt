@@ -3,3 +3,5 @@ my-fake-useragent==0.2.0
 requests
 lxml
 python-dotenv
+flask-sqlalchemy
+validators
