@@ -28,7 +28,7 @@ def create_app(test_config=None):
             CACHE_DEFAULT_TIMEOUT=os.environ.get('CACHE_DEFAULT_TIMEOUT', default=False)
          )
     else:
-         app.config.from_mapping(test_config)
+         app.config.from_object(test_config)
 
     db.app = app
     db.init_app(app)

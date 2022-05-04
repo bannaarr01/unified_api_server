@@ -58,7 +58,7 @@ def auth_user():
                 }
                 }), 200
 
-    return jsonify({'error': 'Invalid credentials'}), 401
+    return jsonify({'error': 'Invalid credentials'}), 400
 
 
 @auth.get('/token/refresh')

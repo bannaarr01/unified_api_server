@@ -30,7 +30,7 @@ def get_header():
 def parseJt():
     session = requests.Session()
     try:
-        jt_req = session.get('https://www.jtexpress.my/shipping-rates', verify = False, timeout=5)
+        jt_req = session.get('https://www.jtexpress.my/shipping-rates', verify = False, timeout=10)
         tree = html.fromstring(jt_req.content)
         form = tree.find('.//form')
         token = form.find('.//input[@name="_token"]').value
@@ -58,7 +58,7 @@ def jt_express(origin_postcode, destination_postcode, length, width, height, wei
                         } 
         headers = get_header()  
         try:
-            req = session.post(url="https://www.jtexpress.my/shipping-rates", params=payload, verify=False, headers=headers,cookies=parsedList[1])
+            req = session.post(url="https://www.jtexpress.my/shipping-rates", params=payload, verify=False, headers=headers,cookies=parsedList[1], timeout=10)
 
             tree = html.fromstring(req.content)
             table = tree.xpath("//table[@class='table table-bordered mb-0']//td[@class='col-4']/text()")[6].strip()
@@ -80,7 +80,7 @@ def line_clear_express(origin_postcode, destination_postcode, weight):
                     }
     headers = get_header()   
     try:                                   
-        req=session.get('https://lineclearexpress.com/my/quote/quote.php', params=payload, headers=headers, verify = False)
+        req=session.get('https://lineclearexpress.com/my/quote/quote.php', params=payload, headers=headers, verify = False, timeout=10)
         data = req.json()
         return {"courier": "lineclearexpress", "rate":float(data["price"])}
     except Exception as e:
@@ -105,7 +105,7 @@ def city_link(origin_postcode, destination_postcode, length, width, height, weig
                 'document_weight': ''
                 }
     try:            
-        req = session.post('https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate',headers=headers, params=payload)
+        req = session.post('https://www.citylinkexpress.com/wp-json/wp/v2/getShippingRate',headers=headers, params=payload, timeout=10)
     
         result = json.loads(req.text)
         for key in result:
@@ -117,7 +117,7 @@ def city_link(origin_postcode, destination_postcode, length, width, height, weig
 ########################################################################
 @shippingrate.post('/')
 @jwt_required()
-@cache.cached(timeout=10, key_prefix="dataList", query_string=True)
+@cache.cached(timeout=15, key_prefix="dataList", query_string=True)
 @swag_from('./docs/shippingrate/shippingrate.yaml')
 def multi_shipping_rates():
         origin_postcode = request.get_json().get('origin_postcode', '')
@@ -158,4 +158,4 @@ def multi_shipping_rates():
         if lineclearexpress != 'error': #lineclearexpress
             dataList.append(lineclearexpress)
 
-        return jsonify({'data': dataList})
+        return jsonify({'data': dataList}), 200
