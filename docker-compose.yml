@@ -4,10 +4,15 @@ services:
     container_name: unified-api-server
     build: .
     ports:
-      - "3000:3000"
+      - "5000:5000"
+  redis:
+    image: redis
+    container_name: redis-container
+    ports:
+       - "6379:6379"  
     env_file:
        - .flaskenv
        - .env
     volumes:
-      - .:/api
+      - .:/api       
  
