@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  api:
+    container_name: unified-api-server
+    build: .
+    ports:
+      - "3000:3000"
+    env_file:
+       - .flaskenv
+       - .env
+    volumes:
+      - .:/api
+ 
