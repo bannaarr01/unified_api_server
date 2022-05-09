@@ -1,12 +1,13 @@
-Get shipping rate
+Shipping rate
 ---
 tags:
   - Shipping Rates
+paths:
+ /shippingrate:
+  post:
+security: 
+  - Bearer: []    
 parameters:
-  - name: Authorization
-    description: The header should contain the authenticated user access token after a successful login example value | Bearer then_the_access_token
-    in: header
-    required: true
   - name: body
     description: The body should contain the below credentials
     in: body
